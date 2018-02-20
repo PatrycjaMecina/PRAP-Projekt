@@ -3,14 +3,9 @@
 #include <arpa/inet.h>
 #include <string.h>
 #include <unistd.h>
-#include <stdlib.h>
 
 int main(int argc , char *argv[])
 {
-    if(argc <= 2 || argc > 3) {
-        printf("Problem podczas uruchamiania klienta!\n");
-        return 0;
-    }
     int socket_desc = -1;
     struct sockaddr_in server;
     char odpowiedz_serwera[3000];
@@ -19,13 +14,11 @@ int main(int argc , char *argv[])
         printf("Nie moge utworzyc gniazda \n");
     }
     //adres serwera zdalnego
-    //server.sin_addr.s_addr = inet_addr("127.0.0.1");    //ustawianie IP serwera
-    server.sin_addr.s_addr = inet_addr(argv[1]);    //ustawianie IP serwera podane jako parametr podczas uruchomiania klienta
+    server.sin_addr.s_addr = inet_addr("127.0.0.1");
     server.sin_family = AF_INET;
-    //server.sin_port = htons( 8888 );    //ustawianie portu serwera
-    server.sin_port = htons( atoi(argv[2]) );   //ustawianie portu serwera podane jako parametr podczas uruchomiania klienta
+    server.sin_port = htons( 8888 );
     //Polacz z serwerem zdalnym (TCP)
-    if (connect(socket_desc , (struct sockaddr *)&server , sizeof(server)) < 0) { //nawiazywanie polaczenia z serwerem oraz sprawdzanie czy udalo sie polaczyc
+    if (connect(socket_desc , (struct sockaddr *)&server , sizeof(server)) < 0) {
         puts("Blad polaczenia\n");
         return 1;
     }
@@ -45,19 +38,6 @@ int main(int argc , char *argv[])
             puts("Blad odbioru danych\n");
         }
         puts(odpowiedz_serwera); // wyswietlenie odpowiedzi serwera
-
-        if(strstr(odpowiedz_serwera, "Wynik") != NULL) { //sprawdzanie czy odpowiedz serwera zawiera wynik, jezeli tak to pytanie czy klient chce zakonczyc prace
-            //puts(server_reply);
-            puts("\nCzy chcesz zakonczyc prace klienta [t/n]?\n");
-            fgets(message, sizeof(message), stdin);
-            if(message[0] == 't') { //sprawdzanie czy klient potwierdza, ze chce zakonczyc prace
-                if( send(socket_desc , message , strlen(message) , 0) < 0) {
-                    puts("Blad wyslania danych");
-                    return 1;
-                }
-                break;
-            }
-        }
         memset (odpowiedz_serwera, 0, sizeof (odpowiedz_serwera));    //ustawienie wartosci 0 w buforze odpowiedzi serwera
         sleep (1);
     }
